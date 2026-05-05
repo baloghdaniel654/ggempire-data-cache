@@ -1,0 +1,17 @@
+{
+  "updatedAt": "2026-05-05T21:09:32.720Z",
+  "files": {
+    "empire-item-version": {
+      "sourceUrl": "https://empire-html5.goodgamestudios.com/default/items/ItemsVersion.properties",
+      "path": "/data/empire/ItemsVersion.properties"
+    },
+    "language-metadata": {
+      "sourceUrl": "https://langserv.public.ggs-ep.com/12/fr/@metadata",
+      "path": "/data/lang/metadata.json"
+    },
+    "e4k-appstore": {
+      "sourceUrl": "https://itunes.apple.com/lookup?id=585661281",
+      "path": "/data/e4k/appstore.json"
+    }
+  }
+}
