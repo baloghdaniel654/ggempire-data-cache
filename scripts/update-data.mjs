@@ -1,10 +1,11 @@
-import { mkdir, readFile, writeFile, copyFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile, copyFile, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import JSZip from "jszip";
 import { XMLParser } from "fast-xml-parser";
 
 const OUT_DIR = "public/data";
+const MAX_ITEM_HISTORY = 8;
 
 const LANGUAGES = [
     "en",
@@ -164,10 +165,12 @@ async function copyIfMissingOrChanged(fromPath, toPath) {
 
 function ensureHistoryShape(history) {
     return {
-        empireItems: Array.isArray(history.empireItems) ? history.empireItems : [],
-        e4kItems: Array.isArray(history.e4kItems) ? history.e4kItems : [],
-        language: Array.isArray(history.language) ? history.language : [],
-        empireDll: Array.isArray(history.empireDll) ? history.empireDll : []
+        empireItems: Array.isArray(history.empireItems)
+            ? history.empireItems
+            : [],
+        e4kItems: Array.isArray(history.e4kItems)
+            ? history.e4kItems
+            : []
     };
 }
 
@@ -175,6 +178,72 @@ function addHistoryEntry(list, predicate, entry) {
     if (!list.some(predicate)) {
         list.push(entry);
     }
+}
+
+async function removeDataFile(dataUrlPath) {
+    if (!dataUrlPath || typeof dataUrlPath !== "string") {
+        return;
+    }
+
+    if (!dataUrlPath.startsWith("/data/")) {
+        return;
+    }
+
+    const relativePath =
+        dataUrlPath.replace(/^\/data\//, "");
+
+    const filePath =
+        outputPath(relativePath);
+
+    if (!existsSync(filePath)) {
+        return;
+    }
+
+    await rm(filePath, {
+        force: true
+    });
+
+    console.log(`Removed old archived file: ${filePath}`);
+}
+
+async function pruneItemHistoryList(list, fileFields = []) {
+    const sorted =
+        [...list].sort((a, b) => {
+            const aTime = new Date(a.addedAt || 0).getTime();
+            const bTime = new Date(b.addedAt || 0).getTime();
+
+            return aTime - bTime;
+        });
+
+    while (sorted.length > MAX_ITEM_HISTORY) {
+        const oldEntry =
+            sorted.shift();
+
+        for (const field of fileFields) {
+            const value =
+                oldEntry?.[field];
+
+            if (typeof value === "string") {
+                await removeDataFile(value);
+            }
+        }
+    }
+
+    return sorted;
+}
+
+async function pruneOldItemVersions(history) {
+    history.empireItems =
+        await pruneItemHistoryList(
+            history.empireItems,
+            ["file"]
+        );
+
+    history.e4kItems =
+        await pruneItemHistoryList(
+            history.e4kItems,
+            ["file", "rawFile"]
+        );
 }
 
 function parseEmpireItemVersion(text) {
@@ -325,22 +394,6 @@ function parseE4kXmlToJson(xmlText) {
     return parsed.root;
 }
 
-/**
- * Generic XML-like JSON normalizer.
- *
- * It does not depend on names like lootBoxes/lootBox or raidBosses/raidBoss.
- * It only checks the structure.
- *
- * Rule:
- *   { someKey: [ ... ] } -> [ ... ]
- *
- * Examples:
- *   lootBoxes: { lootBox: [...] } -> lootBoxes: [...]
- *   raidBosses: { raidBoss: [...] } -> raidBosses: [...]
- *   raidBossLevels: { raidBossLevel: [...] } -> raidBossLevels: [...]
- *
- * This runs recursively, so nested wrappers are also handled.
- */
 function normalizeXmlLikeJson(value) {
     if (Array.isArray(value)) {
         return value.map((entry) =>
@@ -381,8 +434,13 @@ async function updateEmpireItems({ history, manifest }) {
     const versionText = await fetchText(EMPIRE_ITEMS_VERSION_URL);
     const itemVersion = parseEmpireItemVersion(versionText);
 
-    const versionRel = "empire/ItemsVersion.properties";
-    await writeTextIfChanged(outputPath(versionRel), versionText);
+    const versionRel =
+        "empire/ItemsVersion.properties";
+
+    await writeTextIfChanged(
+        outputPath(versionRel),
+        versionText
+    );
 
     const archiveRel =
         `empire/items/items_${slug(itemVersion)}.json`;
@@ -396,12 +454,12 @@ async function updateEmpireItems({ history, manifest }) {
     const latestPath =
         outputPath(latestRel);
 
+    const itemsUrl =
+        `${EMPIRE_ITEMS_BASE_URL}/items_v${itemVersion}.json`;
+
     const shouldDownload =
         !existsSync(archivePath) ||
         !existsSync(latestPath);
-
-    const itemsUrl =
-        `${EMPIRE_ITEMS_BASE_URL}/items_v${itemVersion}.json`;
 
     if (shouldDownload) {
         console.log(`Downloading Empire items ${itemVersion}`);
@@ -450,7 +508,7 @@ async function updateEmpireItems({ history, manifest }) {
     };
 }
 
-async function updateLanguages({ history, manifest }) {
+async function updateLanguages({ manifest }) {
     console.log("");
     console.log("=== Languages ===");
 
@@ -472,42 +530,17 @@ async function updateLanguages({ history, manifest }) {
     );
 
     const files = {};
-    const archivedFiles = {};
     const failed = [];
 
     for (const langCode of LANGUAGES) {
         const latestRel =
             `lang/${langCode}.json`;
 
-        const archiveRel =
-            `lang/versions/${langCode}_${slug(langVersion)}.json`;
-
         const latestPath =
             outputPath(latestRel);
 
-        const archivePath =
-            outputPath(archiveRel);
-
         files[langCode] =
             dataPath(latestRel);
-
-        archivedFiles[langCode] =
-            dataPath(archiveRel);
-
-        const shouldDownload =
-            !existsSync(archivePath) ||
-            !existsSync(latestPath);
-
-        if (!shouldDownload) {
-            console.log(`Language ${langCode} ${langVersion} already cached.`);
-
-            await copyIfMissingOrChanged(
-                archivePath,
-                latestPath
-            );
-
-            continue;
-        }
 
         const langUrl =
             `${LANGUAGE_BASE_URL}/12@${langVersion}/${langCode}/*`;
@@ -519,11 +552,6 @@ async function updateLanguages({ history, manifest }) {
                 await fetchText(langUrl, 30000);
 
             JSON.parse(langText);
-
-            await writeTextIfChanged(
-                archivePath,
-                langText
-            );
 
             await writeTextIfChanged(
                 latestPath,
@@ -545,22 +573,10 @@ async function updateLanguages({ history, manifest }) {
         }
     }
 
-    addHistoryEntry(
-        history.language,
-        (entry) => String(entry.version) === String(langVersion),
-        {
-            version: langVersion,
-            addedAt: new Date().toISOString(),
-            files: archivedFiles,
-            latestFiles: files
-        }
-    );
-
     manifest.language = {
         version: langVersion,
         metadataUrl: dataPath(metadataRel),
         available: files,
-        archived: archivedFiles,
         failed
     };
 }
@@ -759,7 +775,7 @@ async function updateE4k({ history, manifest }) {
     };
 }
 
-async function updateEmpireDll({ history, manifest }) {
+async function updateEmpireDll({ manifest }) {
     console.log("");
     console.log("=== Empire DLL ===");
 
@@ -772,42 +788,18 @@ async function updateEmpireDll({ history, manifest }) {
     const latestRel =
         "empire/dll/ggs.dll.latest.js";
 
-    const archiveRel =
-        `empire/dll/versions/ggs.dll.${slug(info.version)}.js`;
-
     const latestPath =
         outputPath(latestRel);
 
-    const archivePath =
-        outputPath(archiveRel);
+    console.log(`Downloading Empire DLL ${info.version}`);
 
-    const shouldDownload =
-        !existsSync(archivePath) ||
-        !existsSync(latestPath);
+    const dllText =
+        await fetchText(info.dllUrl, 60000);
 
-    if (shouldDownload) {
-        console.log(`Downloading Empire DLL ${info.version}`);
-
-        const dllText =
-            await fetchText(info.dllUrl, 60000);
-
-        await writeTextIfChanged(
-            archivePath,
-            dllText
-        );
-
-        await writeTextIfChanged(
-            latestPath,
-            dllText
-        );
-    } else {
-        console.log(`Empire DLL ${info.version} already cached.`);
-
-        await copyIfMissingOrChanged(
-            archivePath,
-            latestPath
-        );
-    }
+    await writeTextIfChanged(
+        latestPath,
+        dllText
+    );
 
     const versionInfo = {
         version: info.version,
@@ -815,7 +807,6 @@ async function updateEmpireDll({ history, manifest }) {
         versionUrl: info.versionUrl,
         dllUrl: info.dllUrl,
         latestFile: dataPath(latestRel),
-        archivedFile: dataPath(archiveRel),
         checkedAt: new Date().toISOString()
     };
 
@@ -824,27 +815,12 @@ async function updateEmpireDll({ history, manifest }) {
         JSON.stringify(versionInfo, null, 2) + "\n"
     );
 
-    addHistoryEntry(
-        history.empireDll,
-        (entry) => String(entry.version) === String(info.version),
-        {
-            version: info.version,
-            source: info.source,
-            addedAt: new Date().toISOString(),
-            versionUrl: info.versionUrl,
-            sourceUrl: info.dllUrl,
-            file: dataPath(archiveRel),
-            latestFile: dataPath(latestRel)
-        }
-    );
-
     manifest.empireDll = {
         available: true,
         version: info.version,
         source: info.source,
         versionUrl: dataPath(versionRel),
         dllUrl: dataPath(latestRel),
-        archivedDllUrl: dataPath(archiveRel),
         originalIndexUrl: info.versionUrl,
         originalDllUrl: info.dllUrl
     };
@@ -873,7 +849,6 @@ async function main() {
     });
 
     await updateLanguages({
-        history,
         manifest
     });
 
@@ -883,9 +858,10 @@ async function main() {
     });
 
     await updateEmpireDll({
-        history,
         manifest
     });
+
+    await pruneOldItemVersions(history);
 
     await writeTextIfChanged(
         outputPath("manifest.json"),
