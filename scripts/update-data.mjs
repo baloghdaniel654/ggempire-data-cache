@@ -36,6 +36,9 @@ const LANGUAGES = [
 const APP_LOOKUP_URL =
     "https://itunes.apple.com/lookup?id=585661281";
 
+const EMPIRE_INDEX_URL =
+    "https://empire-html5.goodgamestudios.com/default/index.html";
+
 const EMPIRE_ITEMS_VERSION_URL =
     "https://empire-html5.goodgamestudios.com/default/items/ItemsVersion.properties";
 
@@ -47,17 +50,6 @@ const LANGUAGE_VERSION_URL =
 
 const LANGUAGE_BASE_URL =
     "https://langserv.public.ggs-ep.com";
-
-const EMPIRE_DLL_BASE_URL =
-    "https://empire-html5.goodgamestudios.com/default/dll";
-
-const EMPIRE_DLL_VERSION_CANDIDATES = [
-    `${EMPIRE_DLL_BASE_URL}/DLLVersion.properties`,
-    `${EMPIRE_DLL_BASE_URL}/DllVersion.properties`,
-    `${EMPIRE_DLL_BASE_URL}/dllVersion.properties`,
-    `${EMPIRE_DLL_BASE_URL}/Version.properties`,
-    `${EMPIRE_DLL_BASE_URL}/version.properties`
-];
 
 function dataPath(relativePath) {
     return `/data/${relativePath.replaceAll("\\", "/")}`;
@@ -152,23 +144,6 @@ async function writeTextIfChanged(filePath, content) {
     return true;
 }
 
-async function writeBufferIfChanged(filePath, content) {
-    await ensureDir(path.dirname(filePath));
-
-    if (existsSync(filePath)) {
-        const oldContent = await readFile(filePath);
-
-        if (Buffer.compare(oldContent, content) === 0) {
-            console.log(`No change: ${filePath}`);
-            return false;
-        }
-    }
-
-    await writeFile(filePath, content);
-    console.log(`Updated: ${filePath}`);
-    return true;
-}
-
 async function copyIfMissingOrChanged(fromPath, toPath) {
     await ensureDir(path.dirname(toPath));
 
@@ -245,47 +220,79 @@ function parseE4kLoaderVersionFromAppStore(appstoreJson) {
     };
 }
 
-function parseDllVersion(text) {
-    const patterns = [
-        /ggs\.dll\.([a-zA-Z0-9]+)\.js/i,
-        /(?:DLLVersion|DllVersion|dllVersion|version|Version)\s*=\s*([a-zA-Z0-9]+)/,
-        /([a-f0-9]{16,})/i
-    ];
+function getHtmlAttribute(tag, attrName) {
+    const pattern = new RegExp(`${attrName}\\s*=\\s*["']([^"']+)["']`, "i");
+    const match = tag.match(pattern);
+    return match?.[1] || null;
+}
 
-    for (const pattern of patterns) {
-        const match = text.match(pattern);
+function findDllPathInIndexHtml(indexHtml) {
+    const linkTags = indexHtml.match(/<link\b[^>]*>/gi) || [];
 
-        if (match?.[1]) {
-            return match[1];
+    for (const tag of linkTags) {
+        const id = getHtmlAttribute(tag, "id");
+        const rel = getHtmlAttribute(tag, "rel");
+        const href = getHtmlAttribute(tag, "href");
+
+        if (
+            id?.toLowerCase() === "dll" &&
+            rel?.toLowerCase() === "preload" &&
+            href
+        ) {
+            return href;
         }
+    }
+
+    const directMatch = indexHtml.match(
+        /(?:href|src)=["']([^"']*ggs\.dll\.[a-f0-9]{10,}\.js)["']/i
+    );
+
+    if (directMatch?.[1]) {
+        return directMatch[1];
+    }
+
+    const looseMatch = indexHtml.match(
+        /([^"'`\s<>]*ggs\.dll\.[a-f0-9]{10,}\.js)/i
+    );
+
+    if (looseMatch?.[1]) {
+        return looseMatch[1];
     }
 
     return null;
 }
 
 async function resolveEmpireDllInfo() {
-    for (const versionUrl of EMPIRE_DLL_VERSION_CANDIDATES) {
-        try {
-            const text = await fetchText(versionUrl, 15000);
-            const version = parseDllVersion(text);
+    console.log(`Reading Empire index: ${EMPIRE_INDEX_URL}`);
 
-            if (!version) {
-                continue;
-            }
+    const indexHtml = await fetchText(EMPIRE_INDEX_URL, 30000);
+    const dllPath = findDllPathInIndexHtml(indexHtml);
 
-            return {
-                version,
-                versionUrl,
-                dllUrl: `${EMPIRE_DLL_BASE_URL}/ggs.dll.${version}.js`,
-                rawVersionFile: text
-            };
-        } catch (error) {
-            console.warn(`DLL version candidate failed: ${versionUrl}`);
-        }
+    if (!dllPath) {
+        throw new Error("DLL preload link not found in Empire index.html.");
     }
 
-    console.warn("Could not resolve Empire DLL version. DLL cache will be skipped.");
-    return null;
+    const versionMatch =
+        dllPath.match(/\.([a-f0-9]{10,})\.js$/i);
+
+    if (!versionMatch?.[1]) {
+        throw new Error(`Could not extract DLL version from path: ${dllPath}`);
+    }
+
+    const dllVersion = versionMatch[1];
+
+    const dllUrl =
+        new URL(dllPath, EMPIRE_INDEX_URL).toString();
+
+    console.log(`Resolved Empire DLL version: ${dllVersion}`);
+    console.log(`Resolved Empire DLL URL: ${dllUrl}`);
+
+    return {
+        version: dllVersion,
+        versionUrl: EMPIRE_INDEX_URL,
+        dllUrl,
+        source: "empire-index-preload"
+    };
 }
 
 async function unpackE4kArchive(zipBuffer) {
@@ -383,6 +390,7 @@ async function updateLanguages({ history, manifest }) {
     const langVersion = parseLangVersion(metadata);
 
     const metadataRel = "lang/metadata.json";
+
     await writeTextIfChanged(
         outputPath(metadataRel),
         JSON.stringify(metadata, null, 2) + "\n"
@@ -465,6 +473,7 @@ async function updateE4k({ history, manifest }) {
     const appstoreJson = JSON.parse(appstoreText);
 
     const appstoreRel = "e4k/appstore.json";
+
     await writeTextIfChanged(
         outputPath(appstoreRel),
         JSON.stringify(appstoreJson, null, 2) + "\n"
@@ -488,22 +497,29 @@ async function updateE4k({ history, manifest }) {
     }
 
     const versionsRel = "e4k/versions.json";
+
     await writeTextIfChanged(
         outputPath(versionsRel),
         JSON.stringify(versionsJson, null, 2) + "\n"
     );
 
-    const normalizedItemVersion = String(itemVersion).replaceAll(".", "_");
+    const normalizedItemVersion =
+        String(itemVersion).replaceAll(".", "_");
+
     const ggsUrl =
         `https://media.goodgamestudios.com/loader/empirefourkingdoms/${loaderVersion}/itemsXML/items_${normalizedItemVersion}.ggs`;
 
     const archiveRel =
         `e4k/items/items_${slug(loaderVersion)}_${slug(itemVersion)}.json`;
 
-    const latestRel = "e4k/items_latest.json";
+    const latestRel =
+        "e4k/items_latest.json";
 
-    const archivePath = outputPath(archiveRel);
-    const latestPath = outputPath(latestRel);
+    const archivePath =
+        outputPath(archiveRel);
+
+    const latestPath =
+        outputPath(latestRel);
 
     const shouldDownload =
         !existsSync(archivePath) ||
@@ -511,6 +527,7 @@ async function updateE4k({ history, manifest }) {
 
     if (shouldDownload) {
         console.log(`Downloading E4K items ${loaderVersion} / ${itemVersion}`);
+
         const zipBuffer = await fetchBuffer(ggsUrl, 90000);
         const xmlText = await unpackE4kArchive(zipBuffer);
         const parsed = parseE4kXmlToJson(xmlText);
@@ -559,20 +576,20 @@ async function updateEmpireDll({ history, manifest }) {
 
     const info = await resolveEmpireDllInfo();
 
-    if (!info) {
-        manifest.empireDll = {
-            available: false,
-            reason: "Could not resolve DLL version."
-        };
-        return;
-    }
+    const versionRel =
+        "empire/dll/version.json";
 
-    const versionRel = "empire/dll/version.json";
-    const latestRel = "empire/dll/ggs.dll.latest.js";
-    const archiveRel = `empire/dll/versions/ggs.dll.${slug(info.version)}.js`;
+    const latestRel =
+        "empire/dll/ggs.dll.latest.js";
 
-    const latestPath = outputPath(latestRel);
-    const archivePath = outputPath(archiveRel);
+    const archiveRel =
+        `empire/dll/versions/ggs.dll.${slug(info.version)}.js`;
+
+    const latestPath =
+        outputPath(latestRel);
+
+    const archivePath =
+        outputPath(archiveRel);
 
     const shouldDownload =
         !existsSync(archivePath) ||
@@ -580,17 +597,31 @@ async function updateEmpireDll({ history, manifest }) {
 
     if (shouldDownload) {
         console.log(`Downloading Empire DLL ${info.version}`);
-        const dllText = await fetchText(info.dllUrl, 60000);
 
-        await writeTextIfChanged(archivePath, dllText);
-        await writeTextIfChanged(latestPath, dllText);
+        const dllText =
+            await fetchText(info.dllUrl, 60000);
+
+        await writeTextIfChanged(
+            archivePath,
+            dllText
+        );
+
+        await writeTextIfChanged(
+            latestPath,
+            dllText
+        );
     } else {
         console.log(`Empire DLL ${info.version} already cached.`);
-        await copyIfMissingOrChanged(archivePath, latestPath);
+
+        await copyIfMissingOrChanged(
+            archivePath,
+            latestPath
+        );
     }
 
     const versionInfo = {
         version: info.version,
+        source: info.source,
         versionUrl: info.versionUrl,
         dllUrl: info.dllUrl,
         latestFile: dataPath(latestRel),
@@ -608,6 +639,7 @@ async function updateEmpireDll({ history, manifest }) {
         (entry) => String(entry.version) === String(info.version),
         {
             version: info.version,
+            source: info.source,
             addedAt: new Date().toISOString(),
             versionUrl: info.versionUrl,
             sourceUrl: info.dllUrl,
@@ -619,9 +651,11 @@ async function updateEmpireDll({ history, manifest }) {
     manifest.empireDll = {
         available: true,
         version: info.version,
+        source: info.source,
         versionUrl: dataPath(versionRel),
         dllUrl: dataPath(latestRel),
         archivedDllUrl: dataPath(archiveRel),
+        originalIndexUrl: info.versionUrl,
         originalDllUrl: info.dllUrl
     };
 }
@@ -630,6 +664,7 @@ async function main() {
     await ensureDir(OUT_DIR);
 
     const historyPath = outputPath("version-history.json");
+
     const history = ensureHistoryShape(
         await readJsonIfExists(historyPath, {})
     );
