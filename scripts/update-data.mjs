@@ -325,60 +325,53 @@ function parseE4kXmlToJson(xmlText) {
     return parsed.root;
 }
 
-function singularizeCollectionKey(key) {
-    if (key.endsWith("Boxes")) {
-        return key.slice(0, -"Boxes".length) + "Box";
+/**
+ * Generic XML-like JSON normalizer.
+ *
+ * It does not depend on names like lootBoxes/lootBox or raidBosses/raidBoss.
+ * It only checks the structure.
+ *
+ * Rule:
+ *   { someKey: [ ... ] } -> [ ... ]
+ *
+ * Examples:
+ *   lootBoxes: { lootBox: [...] } -> lootBoxes: [...]
+ *   raidBosses: { raidBoss: [...] } -> raidBosses: [...]
+ *   raidBossLevels: { raidBossLevel: [...] } -> raidBossLevels: [...]
+ *
+ * This runs recursively, so nested wrappers are also handled.
+ */
+function normalizeXmlLikeJson(value) {
+    if (Array.isArray(value)) {
+        return value.map((entry) =>
+            normalizeXmlLikeJson(entry)
+        );
     }
 
-    if (key.endsWith("ies")) {
-        return key.slice(0, -3) + "y";
-    }
-
-    if (key.endsWith("ses")) {
-        return key.slice(0, -2);
-    }
-
-    if (key.endsWith("s")) {
-        return key.slice(0, -1);
-    }
-
-    return key;
-}
-
-function normalizeE4kCollection(key, value) {
-    if (!value || typeof value !== "object" || Array.isArray(value)) {
+    if (!value || typeof value !== "object") {
         return value;
-    }
-
-    const preferredInnerKeys = [
-        singularizeCollectionKey(key),
-        key.slice(0, -1),
-        key
-    ];
-
-    for (const innerKey of preferredInnerKeys) {
-        if (Array.isArray(value[innerKey])) {
-            return value[innerKey];
-        }
     }
 
     const entries = Object.entries(value);
 
     if (entries.length === 1 && Array.isArray(entries[0][1])) {
-        return entries[0][1];
+        return entries[0][1].map((entry) =>
+            normalizeXmlLikeJson(entry)
+        );
     }
 
-    return value;
-}
-
-function normalizeE4kData(data) {
     const normalized = {};
 
-    for (const [key, value] of Object.entries(data || {})) {
-        normalized[key] = normalizeE4kCollection(key, value);
+    for (const [key, childValue] of entries) {
+        normalized[key] =
+            normalizeXmlLikeJson(childValue);
     }
 
     return normalized;
+}
+
+function normalizeE4kData(data) {
+    return normalizeXmlLikeJson(data);
 }
 
 async function updateEmpireItems({ history, manifest }) {
@@ -391,10 +384,17 @@ async function updateEmpireItems({ history, manifest }) {
     const versionRel = "empire/ItemsVersion.properties";
     await writeTextIfChanged(outputPath(versionRel), versionText);
 
-    const archiveRel = `empire/items/items_${slug(itemVersion)}.json`;
-    const latestRel = "empire/items_latest.json";
-    const archivePath = outputPath(archiveRel);
-    const latestPath = outputPath(latestRel);
+    const archiveRel =
+        `empire/items/items_${slug(itemVersion)}.json`;
+
+    const latestRel =
+        "empire/items_latest.json";
+
+    const archivePath =
+        outputPath(archiveRel);
+
+    const latestPath =
+        outputPath(latestRel);
 
     const shouldDownload =
         !existsSync(archivePath) ||
@@ -405,15 +405,28 @@ async function updateEmpireItems({ history, manifest }) {
 
     if (shouldDownload) {
         console.log(`Downloading Empire items ${itemVersion}`);
-        const itemsText = await fetchText(itemsUrl, 60000);
+
+        const itemsText =
+            await fetchText(itemsUrl, 60000);
 
         JSON.parse(itemsText);
 
-        await writeTextIfChanged(archivePath, itemsText);
-        await writeTextIfChanged(latestPath, itemsText);
+        await writeTextIfChanged(
+            archivePath,
+            itemsText
+        );
+
+        await writeTextIfChanged(
+            latestPath,
+            itemsText
+        );
     } else {
         console.log(`Empire items ${itemVersion} already cached.`);
-        await copyIfMissingOrChanged(archivePath, latestPath);
+
+        await copyIfMissingOrChanged(
+            archivePath,
+            latestPath
+        );
     }
 
     addHistoryEntry(
@@ -441,11 +454,17 @@ async function updateLanguages({ history, manifest }) {
     console.log("");
     console.log("=== Languages ===");
 
-    const metadataText = await fetchText(LANGUAGE_VERSION_URL);
-    const metadata = JSON.parse(metadataText);
-    const langVersion = parseLangVersion(metadata);
+    const metadataText =
+        await fetchText(LANGUAGE_VERSION_URL);
 
-    const metadataRel = "lang/metadata.json";
+    const metadata =
+        JSON.parse(metadataText);
+
+    const langVersion =
+        parseLangVersion(metadata);
+
+    const metadataRel =
+        "lang/metadata.json";
 
     await writeTextIfChanged(
         outputPath(metadataRel),
@@ -457,14 +476,23 @@ async function updateLanguages({ history, manifest }) {
     const failed = [];
 
     for (const langCode of LANGUAGES) {
-        const latestRel = `lang/${langCode}.json`;
-        const archiveRel = `lang/versions/${langCode}_${slug(langVersion)}.json`;
+        const latestRel =
+            `lang/${langCode}.json`;
 
-        const latestPath = outputPath(latestRel);
-        const archivePath = outputPath(archiveRel);
+        const archiveRel =
+            `lang/versions/${langCode}_${slug(langVersion)}.json`;
 
-        files[langCode] = dataPath(latestRel);
-        archivedFiles[langCode] = dataPath(archiveRel);
+        const latestPath =
+            outputPath(latestRel);
+
+        const archivePath =
+            outputPath(archiveRel);
+
+        files[langCode] =
+            dataPath(latestRel);
+
+        archivedFiles[langCode] =
+            dataPath(archiveRel);
 
         const shouldDownload =
             !existsSync(archivePath) ||
@@ -472,7 +500,12 @@ async function updateLanguages({ history, manifest }) {
 
         if (!shouldDownload) {
             console.log(`Language ${langCode} ${langVersion} already cached.`);
-            await copyIfMissingOrChanged(archivePath, latestPath);
+
+            await copyIfMissingOrChanged(
+                archivePath,
+                latestPath
+            );
+
             continue;
         }
 
@@ -481,12 +514,21 @@ async function updateLanguages({ history, manifest }) {
 
         try {
             console.log(`Downloading language ${langCode} ${langVersion}`);
-            const langText = await fetchText(langUrl, 30000);
+
+            const langText =
+                await fetchText(langUrl, 30000);
 
             JSON.parse(langText);
 
-            await writeTextIfChanged(archivePath, langText);
-            await writeTextIfChanged(latestPath, langText);
+            await writeTextIfChanged(
+                archivePath,
+                langText
+            );
+
+            await writeTextIfChanged(
+                latestPath,
+                langText
+            );
         } catch (error) {
             failed.push({
                 langCode,
@@ -496,7 +538,9 @@ async function updateLanguages({ history, manifest }) {
             console.warn(`Language failed: ${langCode} - ${error.message}`);
 
             if (!existsSync(latestPath)) {
-                throw new Error(`Language ${langCode} failed and no previous latest file exists.`);
+                throw new Error(
+                    `Language ${langCode} failed and no previous latest file exists.`
+                );
             }
         }
     }
@@ -525,10 +569,14 @@ async function updateE4k({ history, manifest }) {
     console.log("");
     console.log("=== E4K ===");
 
-    const appstoreText = await fetchText(APP_LOOKUP_URL);
-    const appstoreJson = JSON.parse(appstoreText);
+    const appstoreText =
+        await fetchText(APP_LOOKUP_URL);
 
-    const appstoreRel = "e4k/appstore.json";
+    const appstoreJson =
+        JSON.parse(appstoreText);
+
+    const appstoreRel =
+        "e4k/appstore.json";
 
     await writeTextIfChanged(
         outputPath(appstoreRel),
@@ -543,16 +591,21 @@ async function updateE4k({ history, manifest }) {
     const versionsUrl =
         `https://media.goodgamestudios.com/loader/empirefourkingdoms/${loaderVersion}/versions.json`;
 
-    const versionsText = await fetchText(versionsUrl);
-    const versionsJson = JSON.parse(versionsText);
+    const versionsText =
+        await fetchText(versionsUrl);
 
-    const itemVersion = versionsJson?.CastleItemXMLVersion;
+    const versionsJson =
+        JSON.parse(versionsText);
+
+    const itemVersion =
+        versionsJson?.CastleItemXMLVersion;
 
     if (!itemVersion) {
         throw new Error("CastleItemXMLVersion missing from E4K versions.json.");
     }
 
-    const versionsRel = "e4k/versions.json";
+    const versionsRel =
+        "e4k/versions.json";
 
     await writeTextIfChanged(
         outputPath(versionsRel),
@@ -597,10 +650,17 @@ async function updateE4k({ history, manifest }) {
     if (shouldDownload) {
         console.log(`Downloading E4K items ${loaderVersion} / ${itemVersion}`);
 
-        const zipBuffer = await fetchBuffer(ggsUrl, 90000);
-        const xmlText = await unpackE4kArchive(zipBuffer);
-        const parsedRaw = parseE4kXmlToJson(xmlText);
-        const normalized = normalizeE4kData(parsedRaw);
+        const zipBuffer =
+            await fetchBuffer(ggsUrl, 90000);
+
+        const xmlText =
+            await unpackE4kArchive(zipBuffer);
+
+        const parsedRaw =
+            parseE4kXmlToJson(xmlText);
+
+        const normalized =
+            normalizeE4kData(parsedRaw);
 
         const rawJsonText =
             JSON.stringify(parsedRaw);
@@ -608,16 +668,35 @@ async function updateE4k({ history, manifest }) {
         const normalizedJsonText =
             JSON.stringify(normalized);
 
-        await writeTextIfChanged(rawArchivePath, rawJsonText);
-        await writeTextIfChanged(rawLatestPath, rawJsonText);
+        await writeTextIfChanged(
+            rawArchivePath,
+            rawJsonText
+        );
 
-        await writeTextIfChanged(archivePath, normalizedJsonText);
-        await writeTextIfChanged(latestPath, normalizedJsonText);
+        await writeTextIfChanged(
+            rawLatestPath,
+            rawJsonText
+        );
+
+        await writeTextIfChanged(
+            archivePath,
+            normalizedJsonText
+        );
+
+        await writeTextIfChanged(
+            latestPath,
+            normalizedJsonText
+        );
     } else {
         console.log(`E4K items ${loaderVersion} / ${itemVersion} already cached.`);
 
+        const sourcePathForNormalization =
+            existsSync(rawArchivePath)
+                ? rawArchivePath
+                : archivePath;
+
         const existingText =
-            await readFile(archivePath, "utf8");
+            await readFile(sourcePathForNormalization, "utf8");
 
         const existingJson =
             JSON.parse(existingText);
@@ -628,11 +707,21 @@ async function updateE4k({ history, manifest }) {
         const normalizedJsonText =
             JSON.stringify(normalized);
 
-        await writeTextIfChanged(archivePath, normalizedJsonText);
-        await writeTextIfChanged(latestPath, normalizedJsonText);
+        await writeTextIfChanged(
+            archivePath,
+            normalizedJsonText
+        );
+
+        await writeTextIfChanged(
+            latestPath,
+            normalizedJsonText
+        );
 
         if (existsSync(rawArchivePath)) {
-            await copyIfMissingOrChanged(rawArchivePath, rawLatestPath);
+            await copyIfMissingOrChanged(
+                rawArchivePath,
+                rawLatestPath
+            );
         }
     }
 
@@ -674,7 +763,8 @@ async function updateEmpireDll({ history, manifest }) {
     console.log("");
     console.log("=== Empire DLL ===");
 
-    const info = await resolveEmpireDllInfo();
+    const info =
+        await resolveEmpireDllInfo();
 
     const versionRel =
         "empire/dll/version.json";
@@ -763,11 +853,13 @@ async function updateEmpireDll({ history, manifest }) {
 async function main() {
     await ensureDir(OUT_DIR);
 
-    const historyPath = outputPath("version-history.json");
+    const historyPath =
+        outputPath("version-history.json");
 
-    const history = ensureHistoryShape(
-        await readJsonIfExists(historyPath, {})
-    );
+    const history =
+        ensureHistoryShape(
+            await readJsonIfExists(historyPath, {})
+        );
 
     const manifest = {
         updatedAt: new Date().toISOString(),
@@ -775,10 +867,25 @@ async function main() {
         languages: LANGUAGES
     };
 
-    await updateEmpireItems({ history, manifest });
-    await updateLanguages({ history, manifest });
-    await updateE4k({ history, manifest });
-    await updateEmpireDll({ history, manifest });
+    await updateEmpireItems({
+        history,
+        manifest
+    });
+
+    await updateLanguages({
+        history,
+        manifest
+    });
+
+    await updateE4k({
+        history,
+        manifest
+    });
+
+    await updateEmpireDll({
+        history,
+        manifest
+    });
 
     await writeTextIfChanged(
         outputPath("manifest.json"),
