@@ -1,17 +1,109 @@
 {
-  "updatedAt": "2026-05-08T11:46:34.058Z",
-  "files": {
-    "empire-item-version": {
-      "sourceUrl": "https://empire-html5.goodgamestudios.com/default/items/ItemsVersion.properties",
-      "path": "/data/empire/ItemsVersion.properties"
+  "updatedAt": "2026-05-08T12:19:05.939Z",
+  "generatedBy": "GitHub Actions",
+  "languages": [
+    "en",
+    "ar",
+    "es",
+    "bg",
+    "pt",
+    "cs",
+    "de",
+    "da",
+    "fi",
+    "fr",
+    "el",
+    "hu",
+    "it",
+    "ja",
+    "ko",
+    "lt",
+    "nl",
+    "no",
+    "pl",
+    "ro",
+    "ru",
+    "sv",
+    "sk",
+    "tr"
+  ],
+  "empire": {
+    "itemVersion": "770.07",
+    "itemVersionUrl": "/data/empire/ItemsVersion.properties",
+    "itemsUrl": "/data/empire/items_latest.json",
+    "archivedItemsUrl": "/data/empire/items/items_770_07.json",
+    "originalItemsUrl": "https://empire-html5.goodgamestudios.com/default/items/items_v770.07.json"
+  },
+  "language": {
+    "version": "4227",
+    "metadataUrl": "/data/lang/metadata.json",
+    "available": {
+      "en": "/data/lang/en.json",
+      "ar": "/data/lang/ar.json",
+      "es": "/data/lang/es.json",
+      "bg": "/data/lang/bg.json",
+      "pt": "/data/lang/pt.json",
+      "cs": "/data/lang/cs.json",
+      "de": "/data/lang/de.json",
+      "da": "/data/lang/da.json",
+      "fi": "/data/lang/fi.json",
+      "fr": "/data/lang/fr.json",
+      "el": "/data/lang/el.json",
+      "hu": "/data/lang/hu.json",
+      "it": "/data/lang/it.json",
+      "ja": "/data/lang/ja.json",
+      "ko": "/data/lang/ko.json",
+      "lt": "/data/lang/lt.json",
+      "nl": "/data/lang/nl.json",
+      "no": "/data/lang/no.json",
+      "pl": "/data/lang/pl.json",
+      "ro": "/data/lang/ro.json",
+      "ru": "/data/lang/ru.json",
+      "sv": "/data/lang/sv.json",
+      "sk": "/data/lang/sk.json",
+      "tr": "/data/lang/tr.json"
     },
-    "language-metadata": {
-      "sourceUrl": "https://langserv.public.ggs-ep.com/12/fr/@metadata",
-      "path": "/data/lang/metadata.json"
+    "archived": {
+      "en": "/data/lang/versions/en_4227.json",
+      "ar": "/data/lang/versions/ar_4227.json",
+      "es": "/data/lang/versions/es_4227.json",
+      "bg": "/data/lang/versions/bg_4227.json",
+      "pt": "/data/lang/versions/pt_4227.json",
+      "cs": "/data/lang/versions/cs_4227.json",
+      "de": "/data/lang/versions/de_4227.json",
+      "da": "/data/lang/versions/da_4227.json",
+      "fi": "/data/lang/versions/fi_4227.json",
+      "fr": "/data/lang/versions/fr_4227.json",
+      "el": "/data/lang/versions/el_4227.json",
+      "hu": "/data/lang/versions/hu_4227.json",
+      "it": "/data/lang/versions/it_4227.json",
+      "ja": "/data/lang/versions/ja_4227.json",
+      "ko": "/data/lang/versions/ko_4227.json",
+      "lt": "/data/lang/versions/lt_4227.json",
+      "nl": "/data/lang/versions/nl_4227.json",
+      "no": "/data/lang/versions/no_4227.json",
+      "pl": "/data/lang/versions/pl_4227.json",
+      "ro": "/data/lang/versions/ro_4227.json",
+      "ru": "/data/lang/versions/ru_4227.json",
+      "sv": "/data/lang/versions/sv_4227.json",
+      "sk": "/data/lang/versions/sk_4227.json",
+      "tr": "/data/lang/versions/tr_4227.json"
     },
-    "e4k-appstore": {
-      "sourceUrl": "https://itunes.apple.com/lookup?id=585661281",
-      "path": "/data/e4k/appstore.json"
-    }
+    "failed": []
+  },
+  "e4k": {
+    "appVersion": "4131013",
+    "appStoreVersion": "4.131.13",
+    "itemVersion": "770.RC.06",
+    "appstoreUrl": "/data/e4k/appstore.json",
+    "versionsUrl": "/data/e4k/versions.json",
+    "itemsUrl": "/data/e4k/items_latest.json",
+    "archivedItemsUrl": "/data/e4k/items/items_4131013_770_RC_06.json",
+    "originalVersionsUrl": "https://media.goodgamestudios.com/loader/empirefourkingdoms/4131013/versions.json",
+    "originalItemsUrl": "https://media.goodgamestudios.com/loader/empirefourkingdoms/4131013/itemsXML/items_770_RC_06.ggs"
+  },
+  "empireDll": {
+    "available": false,
+    "reason": "Could not resolve DLL version."
   }
 }
