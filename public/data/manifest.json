@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-08T20:17:08.589Z",
+  "updatedAt": "2026-05-08T21:22:00.284Z",
   "generatedBy": "GitHub Actions",
   "languages": [
     "en",
@@ -63,32 +63,6 @@
       "sk": "/data/lang/sk.json",
       "tr": "/data/lang/tr.json"
     },
-    "archived": {
-      "en": "/data/lang/versions/en_4227.json",
-      "ar": "/data/lang/versions/ar_4227.json",
-      "es": "/data/lang/versions/es_4227.json",
-      "bg": "/data/lang/versions/bg_4227.json",
-      "pt": "/data/lang/versions/pt_4227.json",
-      "cs": "/data/lang/versions/cs_4227.json",
-      "de": "/data/lang/versions/de_4227.json",
-      "da": "/data/lang/versions/da_4227.json",
-      "fi": "/data/lang/versions/fi_4227.json",
-      "fr": "/data/lang/versions/fr_4227.json",
-      "el": "/data/lang/versions/el_4227.json",
-      "hu": "/data/lang/versions/hu_4227.json",
-      "it": "/data/lang/versions/it_4227.json",
-      "ja": "/data/lang/versions/ja_4227.json",
-      "ko": "/data/lang/versions/ko_4227.json",
-      "lt": "/data/lang/versions/lt_4227.json",
-      "nl": "/data/lang/versions/nl_4227.json",
-      "no": "/data/lang/versions/no_4227.json",
-      "pl": "/data/lang/versions/pl_4227.json",
-      "ro": "/data/lang/versions/ro_4227.json",
-      "ru": "/data/lang/versions/ru_4227.json",
-      "sv": "/data/lang/versions/sv_4227.json",
-      "sk": "/data/lang/versions/sk_4227.json",
-      "tr": "/data/lang/versions/tr_4227.json"
-    },
     "failed": []
   },
   "e4k": {
@@ -110,7 +84,6 @@
     "source": "empire-index-preload",
     "versionUrl": "/data/empire/dll/version.json",
     "dllUrl": "/data/empire/dll/ggs.dll.latest.js",
-    "archivedDllUrl": "/data/empire/dll/versions/ggs.dll.7dad7e3010085d37ddb6.js",
     "originalIndexUrl": "https://empire-html5.goodgamestudios.com/default/index.html",
     "originalDllUrl": "https://empire-html5.goodgamestudios.com/default/dll/ggs.dll.7dad7e3010085d37ddb6.js"
   }
