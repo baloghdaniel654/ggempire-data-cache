@@ -325,6 +325,62 @@ function parseE4kXmlToJson(xmlText) {
     return parsed.root;
 }
 
+function singularizeCollectionKey(key) {
+    if (key.endsWith("Boxes")) {
+        return key.slice(0, -"Boxes".length) + "Box";
+    }
+
+    if (key.endsWith("ies")) {
+        return key.slice(0, -3) + "y";
+    }
+
+    if (key.endsWith("ses")) {
+        return key.slice(0, -2);
+    }
+
+    if (key.endsWith("s")) {
+        return key.slice(0, -1);
+    }
+
+    return key;
+}
+
+function normalizeE4kCollection(key, value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return value;
+    }
+
+    const preferredInnerKeys = [
+        singularizeCollectionKey(key),
+        key.slice(0, -1),
+        key
+    ];
+
+    for (const innerKey of preferredInnerKeys) {
+        if (Array.isArray(value[innerKey])) {
+            return value[innerKey];
+        }
+    }
+
+    const entries = Object.entries(value);
+
+    if (entries.length === 1 && Array.isArray(entries[0][1])) {
+        return entries[0][1];
+    }
+
+    return value;
+}
+
+function normalizeE4kData(data) {
+    const normalized = {};
+
+    for (const [key, value] of Object.entries(data || {})) {
+        normalized[key] = normalizeE4kCollection(key, value);
+    }
+
+    return normalized;
+}
+
 async function updateEmpireItems({ history, manifest }) {
     console.log("");
     console.log("=== Empire items ===");
@@ -512,16 +568,29 @@ async function updateE4k({ history, manifest }) {
     const archiveRel =
         `e4k/items/items_${slug(loaderVersion)}_${slug(itemVersion)}.json`;
 
+    const rawArchiveRel =
+        `e4k/items/raw/items_${slug(loaderVersion)}_${slug(itemVersion)}.raw.json`;
+
     const latestRel =
         "e4k/items_latest.json";
+
+    const rawLatestRel =
+        "e4k/items_latest.raw.json";
 
     const archivePath =
         outputPath(archiveRel);
 
+    const rawArchivePath =
+        outputPath(rawArchiveRel);
+
     const latestPath =
         outputPath(latestRel);
 
+    const rawLatestPath =
+        outputPath(rawLatestRel);
+
     const shouldDownload =
+        !existsSync(rawArchivePath) ||
         !existsSync(archivePath) ||
         !existsSync(latestPath);
 
@@ -530,14 +599,41 @@ async function updateE4k({ history, manifest }) {
 
         const zipBuffer = await fetchBuffer(ggsUrl, 90000);
         const xmlText = await unpackE4kArchive(zipBuffer);
-        const parsed = parseE4kXmlToJson(xmlText);
-        const jsonText = JSON.stringify(parsed);
+        const parsedRaw = parseE4kXmlToJson(xmlText);
+        const normalized = normalizeE4kData(parsedRaw);
 
-        await writeTextIfChanged(archivePath, jsonText);
-        await writeTextIfChanged(latestPath, jsonText);
+        const rawJsonText =
+            JSON.stringify(parsedRaw);
+
+        const normalizedJsonText =
+            JSON.stringify(normalized);
+
+        await writeTextIfChanged(rawArchivePath, rawJsonText);
+        await writeTextIfChanged(rawLatestPath, rawJsonText);
+
+        await writeTextIfChanged(archivePath, normalizedJsonText);
+        await writeTextIfChanged(latestPath, normalizedJsonText);
     } else {
         console.log(`E4K items ${loaderVersion} / ${itemVersion} already cached.`);
-        await copyIfMissingOrChanged(archivePath, latestPath);
+
+        const existingText =
+            await readFile(archivePath, "utf8");
+
+        const existingJson =
+            JSON.parse(existingText);
+
+        const normalized =
+            normalizeE4kData(existingJson);
+
+        const normalizedJsonText =
+            JSON.stringify(normalized);
+
+        await writeTextIfChanged(archivePath, normalizedJsonText);
+        await writeTextIfChanged(latestPath, normalizedJsonText);
+
+        if (existsSync(rawArchivePath)) {
+            await copyIfMissingOrChanged(rawArchivePath, rawLatestPath);
+        }
     }
 
     addHistoryEntry(
@@ -553,7 +649,9 @@ async function updateE4k({ history, manifest }) {
             versionsSourceUrl: versionsUrl,
             sourceUrl: ggsUrl,
             file: dataPath(archiveRel),
-            latestFile: dataPath(latestRel)
+            rawFile: dataPath(rawArchiveRel),
+            latestFile: dataPath(latestRel),
+            rawLatestFile: dataPath(rawLatestRel)
         }
     );
 
@@ -564,7 +662,9 @@ async function updateE4k({ history, manifest }) {
         appstoreUrl: dataPath(appstoreRel),
         versionsUrl: dataPath(versionsRel),
         itemsUrl: dataPath(latestRel),
+        rawItemsUrl: dataPath(rawLatestRel),
         archivedItemsUrl: dataPath(archiveRel),
+        archivedRawItemsUrl: dataPath(rawArchiveRel),
         originalVersionsUrl: versionsUrl,
         originalItemsUrl: ggsUrl
     };
