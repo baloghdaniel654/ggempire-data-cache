@@ -1,0 +1,13 @@
+{
+  "name": "ggempire-data-cache",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "update": "node scripts/update-data.mjs"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.2.5",
+    "jszip": "^3.10.1"
+  }
+}
