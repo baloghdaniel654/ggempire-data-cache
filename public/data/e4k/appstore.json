@@ -2,14 +2,16 @@
   "resultCount": 1,
   "results": [
     {
-      "screenshotUrls": [],
-      "ipadScreenshotUrls": [],
-      "appletvScreenshotUrls": [],
-      "artworkUrl60": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ec/db/cf/ecdbcf95-c8c7-50c1-f6a4-e75a3b5d81b0/AppIcon-0-0-1x_U007emarketing-0-5-0-85-220.png/60x60bb.jpg",
-      "artworkUrl512": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ec/db/cf/ecdbcf95-c8c7-50c1-f6a4-e75a3b5d81b0/AppIcon-0-0-1x_U007emarketing-0-5-0-85-220.png/512x512bb.jpg",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ec/db/cf/ecdbcf95-c8c7-50c1-f6a4-e75a3b5d81b0/AppIcon-0-0-1x_U007emarketing-0-5-0-85-220.png/100x100bb.jpg",
-      "artistViewUrl": "https://apps.apple.com/us/developer/goodgame-studio/id553166917?uo=4",
       "isGameCenterEnabled": true,
+      "advisories": [
+        "Infrequent/Mild Alcohol, Tobacco, or Drug Use or References",
+        "Frequent/Intense Contests",
+        "Loot Boxes",
+        "Frequent/Intense Cartoon or Fantasy Violence"
+      ],
+      "artistViewUrl": "https://apps.apple.com/us/developer/goodgame-studio/id553166917?uo=4",
+      "artworkUrl60": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ec/db/cf/ecdbcf95-c8c7-50c1-f6a4-e75a3b5d81b0/AppIcon-0-0-1x_U007emarketing-0-5-0-85-220.png/60x60bb.jpg",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ec/db/cf/ecdbcf95-c8c7-50c1-f6a4-e75a3b5d81b0/AppIcon-0-0-1x_U007emarketing-0-5-0-85-220.png/100x100bb.jpg",
       "supportedDevices": [
         "iPhone5s-iPhone5s",
         "iPadAir-iPadAir",
@@ -140,18 +142,49 @@
         "iPadAir13M4Cellular-iPadAir13M4Cellular"
       ],
       "kind": "software",
+      "appletvScreenshotUrls": [],
+      "screenshotUrls": [],
+      "ipadScreenshotUrls": [],
+      "artworkUrl512": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ec/db/cf/ecdbcf95-c8c7-50c1-f6a4-e75a3b5d81b0/AppIcon-0-0-1x_U007emarketing-0-5-0-85-220.png/512x512bb.jpg",
       "features": [
         "gameCenter",
         "iosUniversal"
       ],
-      "advisories": [
-        "Infrequent/Mild Alcohol, Tobacco, or Drug Use or References",
-        "Frequent/Intense Contests",
-        "Loot Boxes",
-        "Frequent/Intense Cartoon or Fantasy Violence"
+      "minimumOsVersion": "15.0",
+      "artistId": 553166917,
+      "artistName": "Goodgame Studio",
+      "genres": [
+        "Games",
+        "Entertainment",
+        "Simulation",
+        "Strategy"
       ],
-      "averageUserRating": 4.41234,
+      "price": 0,
       "trackCensoredName": "Empire Four Kingdoms",
+      "trackViewUrl": "https://apps.apple.com/us/app/empire-four-kingdoms/id585661281?uo=4",
+      "contentAdvisoryRating": "12+",
+      "averageUserRating": 4.41017,
+      "genreIds": [
+        "6014",
+        "6016",
+        "7015",
+        "7017"
+      ],
+      "trackId": 585661281,
+      "trackName": "Empire Four Kingdoms",
+      "isVppDeviceBasedLicensingEnabled": true,
+      "currentVersionReleaseDate": "2026-05-05T11:05:40Z",
+      "primaryGenreName": "Games",
+      "primaryGenreId": 6014,
+      "sellerName": "Stillfront Germany GmbH",
+      "releaseDate": "2013-03-12T13:19:57Z",
+      "releaseNotes": "A fearsome new creature has awakened across the Four Kingdoms — ancient, powerful, and hungry for destruction. Sharpen your blades and rally your armies: this mighty beast will not fall easily, but glory awaits the rulers bold enough to face it.\nOur royal scribes have also sealed the cracks in the kingdom's foundation — squashing bugs and restoring stability so no foe, seen or unseen, can disrupt your reign.",
+      "version": "4.131.13",
+      "wrapperType": "software",
+      "currency": "USD",
+      "description": "Build a powerful empire and fight epic battles against millions of players!\nAs Lord and King, you have been called upon to build a mighty fortress and control the fate of your kingdom in this award-winning medieval adventure MMO strategy game!\n\nUse your strategy to outsmart your enemies!\nUnlock powerful Generals and use their abilities to your advantage. It is not about who has the biggest army, but who can plan their every move in the most cunning way. Each General has special talents that will give you an edge to defeat opponents, but only when used wisely. Plan your strategy carefully and see if you are wily enough to outsmart your enemies!\n\nConquer new lands in four exciting kingdoms\nMuster an army of valiant knights, equip your merciless troops with deadly weapons, improve their skills, and send them into battle to fight under your banner! Of course, every great empire also needs a strong defense - choose the right strategy to send your enemy’s army fleeing in terror!\n\nHonor, glory, and riches!\nWin rewards by achieving honor and glory in battle, and go from rags to riches by managing your kingdom wisely. Build your fortress from the foundations up, so that it becomes the mightiest across the land. Produce resources and trade with other players to expand your empire over multiple kingdoms. More land means more subjects - and more gold for you!\n\nForge powerful diplomatic alliances\nJoin forces with your friends and other lords to stand against your enemies and conquer new lands together! Support each other by sending resources or troops, or help each other to rebuild after an attack. United we stand!\n\nThis realistic medieval strategy MMO will transport you back to an age when power was everything and only the strongest survived. Prove that you've got what it takes to be the mightiest and most honourable lord in all the land!\n\n* Create your civilization and become a king in this medieval strategy game\n* Fight epic wars against countless other players on an interactive world map\n* Build a majestic castle to withstand even your strongest opponents\n* Raise an army of knights, archers, swordsmen, and more\n* Form an unbeatable alliance with your friends and other powerful players\n* Produce and trade resources to construct more than 60 different buildings\n* Explore Empire: Four Kingdoms and become a true hero and legend!\n* Regular updates with new content and challenges\n\nPrivacy Policy, Terms Conditions, and Imprint: https://www.goodgamestudios.com/terms_en/\nThis app is completely free to play, requires an internet connection and offers optional in-app purchases.",
+      "sellerUrl": "https://www.goodgamestudios.com/",
+      "averageUserRatingForCurrentVersion": 4.41017,
       "languageCodesISO2A": [
         "CS",
         "NL",
@@ -172,43 +205,10 @@
       ],
       "fileSizeBytes": "269820928",
       "formattedPrice": "Free",
-      "contentAdvisoryRating": "12+",
-      "userRatingCountForCurrentVersion": 3143,
-      "trackViewUrl": "https://apps.apple.com/us/app/empire-four-kingdoms/id585661281?uo=4",
+      "userRatingCountForCurrentVersion": 3145,
       "trackContentRating": "12+",
-      "averageUserRatingForCurrentVersion": 4.41234,
-      "sellerUrl": "https://www.goodgamestudios.com/",
-      "minimumOsVersion": "15.0",
-      "price": 0,
-      "genres": [
-        "Games",
-        "Entertainment",
-        "Simulation",
-        "Strategy"
-      ],
-      "sellerName": "Stillfront Germany GmbH",
-      "isVppDeviceBasedLicensingEnabled": true,
-      "releaseDate": "2013-03-12T13:19:57Z",
-      "currentVersionReleaseDate": "2026-05-05T11:05:40Z",
-      "trackId": 585661281,
-      "trackName": "Empire Four Kingdoms",
-      "releaseNotes": "A fearsome new creature has awakened across the Four Kingdoms — ancient, powerful, and hungry for destruction. Sharpen your blades and rally your armies: this mighty beast will not fall easily, but glory awaits the rulers bold enough to face it.\nOur royal scribes have also sealed the cracks in the kingdom's foundation — squashing bugs and restoring stability so no foe, seen or unseen, can disrupt your reign.",
-      "version": "4.131.13",
-      "wrapperType": "software",
-      "currency": "USD",
-      "description": "Build a powerful empire and fight epic battles against millions of players!\nAs Lord and King, you have been called upon to build a mighty fortress and control the fate of your kingdom in this award-winning medieval adventure MMO strategy game!\n\nUse your strategy to outsmart your enemies!\nUnlock powerful Generals and use their abilities to your advantage. It is not about who has the biggest army, but who can plan their every move in the most cunning way. Each General has special talents that will give you an edge to defeat opponents, but only when used wisely. Plan your strategy carefully and see if you are wily enough to outsmart your enemies!\n\nConquer new lands in four exciting kingdoms\nMuster an army of valiant knights, equip your merciless troops with deadly weapons, improve their skills, and send them into battle to fight under your banner! Of course, every great empire also needs a strong defense - choose the right strategy to send your enemy’s army fleeing in terror!\n\nHonor, glory, and riches!\nWin rewards by achieving honor and glory in battle, and go from rags to riches by managing your kingdom wisely. Build your fortress from the foundations up, so that it becomes the mightiest across the land. Produce resources and trade with other players to expand your empire over multiple kingdoms. More land means more subjects - and more gold for you!\n\nForge powerful diplomatic alliances\nJoin forces with your friends and other lords to stand against your enemies and conquer new lands together! Support each other by sending resources or troops, or help each other to rebuild after an attack. United we stand!\n\nThis realistic medieval strategy MMO will transport you back to an age when power was everything and only the strongest survived. Prove that you've got what it takes to be the mightiest and most honourable lord in all the land!\n\n* Create your civilization and become a king in this medieval strategy game\n* Fight epic wars against countless other players on an interactive world map\n* Build a majestic castle to withstand even your strongest opponents\n* Raise an army of knights, archers, swordsmen, and more\n* Form an unbeatable alliance with your friends and other powerful players\n* Produce and trade resources to construct more than 60 different buildings\n* Explore Empire: Four Kingdoms and become a true hero and legend!\n* Regular updates with new content and challenges\n\nPrivacy Policy, Terms Conditions, and Imprint: https://www.goodgamestudios.com/terms_en/\nThis app is completely free to play, requires an internet connection and offers optional in-app purchases.",
       "bundleId": "com.goodgamestudios.empirefourkingdoms",
-      "primaryGenreName": "Games",
-      "primaryGenreId": 6014,
-      "artistId": 553166917,
-      "artistName": "Goodgame Studio",
-      "genreIds": [
-        "6014",
-        "6016",
-        "7015",
-        "7017"
-      ],
-      "userRatingCount": 3143
+      "userRatingCount": 3145
     }
   ]
 }
