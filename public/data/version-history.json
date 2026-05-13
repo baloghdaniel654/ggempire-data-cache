@@ -24,6 +24,18 @@
   ],
   "e4kItems": [
     {
+      "appVersion": "",
+      "appStoreVersion": "",
+      "itemVersion": "766.RC.02",
+      "addedAt": "2026-03-22T13:40:08.000Z",
+      "versionsSourceUrl": "",
+      "sourceUrl": "items_766_RC_02.xml",
+      "file": "/data/e4k/items/items_766_RC_02.json",
+      "rawFile": "/data/e4k/items/raw/items_766_RC_02.raw.json",
+      "latestFile": "/data/e4k/items_latest.json",
+      "rawLatestFile": "/data/e4k/items_latest.raw.json"
+    },
+    {
       "appVersion": "4131013",
       "appStoreVersion": "4.131.13",
       "itemVersion": "770.RC.06",
