@@ -35,7 +35,7 @@ const LANGUAGES = [
 ];
 
 const APP_LOOKUP_URL =
-    "https://itunes.apple.com/lookup?id=585661281";
+    "https://itunes.apple.com/lookup?id=585661281&country=de";
 
 const EMPIRE_INDEX_URL =
     "https://empire-html5.goodgamestudios.com/default/index.html";
