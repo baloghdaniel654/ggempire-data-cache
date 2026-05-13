@@ -1,6 +1,13 @@
 {
   "empireItems": [
     {
+      "version": "766.02",
+      "addedAt": "2026-05-13T00:00:00.000Z",
+      "sourceUrl": "",
+      "file": "/data/empire/items/items-766.02.json",
+      "latestFile": "/data/empire/items_latest.json"
+    },
+    {
       "version": "770.07",
       "addedAt": "2026-05-08T12:19:06.839Z",
       "sourceUrl": "https://empire-html5.goodgamestudios.com/default/items/items_v770.07.json",
